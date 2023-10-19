@@ -7,11 +7,14 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -48,5 +51,19 @@ public class ContactController {
         }
         contactService.saveMessageDetails(contact);
         return "redirect:/contact";
+    }
+
+    @GetMapping("/displayMessages")
+    public ModelAndView displayMessages() {
+        List<Contact> contactMsgs = contactService.findMsgsWithOpenStatus();
+        ModelAndView modelAndView = new ModelAndView("messages.html");
+        modelAndView.addObject("contactMsgs", contactMsgs);
+        return modelAndView;
+    }
+
+    @GetMapping("/closeMsg")
+    public String closeMsg(@RequestParam int id, Authentication authentication) {
+        contactService.updateMsgStatus(id, authentication.getName());
+        return "redirect:displayMessages";
     }
 }
